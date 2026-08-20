@@ -1,0 +1,11 @@
+[Unit]
+Description=OpenRGB SDK server (Mystic Light)
+
+[Service]
+User=jp
+ExecStart=/usr/bin/openrgb --server --server-host 127.0.0.1 --server-port 6742
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

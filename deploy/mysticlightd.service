@@ -1,0 +1,15 @@
+[Unit]
+Description=Mystic Light -> HA MQTT bridge
+After=openrgb-sdk.service network-online.target
+Requires=openrgb-sdk.service
+
+[Service]
+User=jp
+WorkingDirectory=/home/jp/Projects/mysticlight
+EnvironmentFile=/home/jp/Projects/mysticlight/.env
+ExecStart=/home/jp/Projects/mysticlight/venv/bin/python -m mysticlight
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
