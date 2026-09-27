@@ -102,4 +102,4 @@ All translation/health logic is pure and unit-tested (`bridge.py`,
 
 ## License
 
-[GPL-3.0-or-later](LICENSE)
+AGPL-3.0-or-later © 2026 Jeffrey Pine Hein. See [LICENSE](LICENSE).

@@ -1,4 +1,4 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: AGPL-3.0-or-later
 """Pure health-metric logic: normalization, worst-of composite, LED color map.
 
 Raw metric units: cpu = load1/ncpu ratio; cpu_temp = °C; ram/disk/gpu = percent
