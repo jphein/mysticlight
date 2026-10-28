@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# MSI Mystic Light controller (1462:b926) for the openrgb-sdk SYSTEM service (User=<you>).
+#
+# OpenRGB's packaged 60-openrgb.rules grants this device via TAG+="uaccess", an ACL that only exists once the user has
+# a SEAT (console) session. openrgb-sdk starts at boot, a few seconds before login, scans for devices ONCE, and so never
+# finds the board ("no motherboard device in OpenRGB" forever). A plain group grant removes the race.
+#
+# Install: set GROUP to the service user's primary group, then
+#   sudo cp deploy/61-mystic-light-openrgb.rules /etc/udev/rules.d/ && sudo udevadm control --reload \
+#     && sudo udevadm trigger --action=change --subsystem-match=hidraw
+# Other boards: check `lsusb | grep 1462:` and adjust idProduct.
+SUBSYSTEMS=="usb|hidraw", ATTRS{idVendor}=="1462", ATTRS{idProduct}=="b926", MODE="0660", GROUP="jp"

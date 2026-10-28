@@ -56,7 +56,8 @@ MQTT_PASSWORD=<password>
 NET_IFACE=<your NIC, e.g. enp5s0>
 EOF
 
-# adjust paths/User in deploy/*.service, then:
+# adjust paths/User in deploy/*.service (and GROUP in the udev rule), then:
+sudo cp deploy/61-mystic-light-openrgb.rules /etc/udev/rules.d/ && sudo udevadm control --reload
 sudo cp deploy/*.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable --now openrgb-sdk mysticlightd
@@ -84,6 +85,10 @@ Health thresholds (warn → critical per metric) live in
 ## Notes & quirks
 
 - **Keep the OpenRGB SDK server on localhost** — its protocol has no auth.
+- **"no motherboard device in OpenRGB" after a reboot** is a boot race: OpenRGB's own udev rule grants the MSI
+  controller only to a user with a console (seat) session, the SDK server starts a few seconds before login and scans
+  once, so it never sees the board. `deploy/61-mystic-light-openrgb.rules` grants it by group instead; until it's
+  installed, `sudo systemctl restart openrgb-sdk mysticlightd` after logging in recovers.
 - Hardware effects are **device-wide** (MSI firmware limitation); per-zone
   colors only apply in `Direct` mode. The health pulse is software-animated
   for the same reason.
