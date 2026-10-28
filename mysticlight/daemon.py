@@ -20,6 +20,7 @@ from openrgb import OpenRGBClient
 from openrgb.utils import DeviceType, RGBColor
 
 from mysticlight import bridge, health, version_api
+from mysticlight.login_file import read_login_file
 
 log = logging.getLogger("mysticlightd")
 
@@ -35,6 +36,8 @@ class Config:
         self.mqtt_port = int(env.get("MQTT_PORT", "1883"))
         self.mqtt_user = env.get("MQTT_USER", "")
         self.mqtt_password = env.get("MQTT_PASSWORD", "")
+        if env.get("MQTT_LOGIN_FILE"):  # wins over the two above; see login_file.py
+            self.mqtt_user, self.mqtt_password = read_login_file(env["MQTT_LOGIN_FILE"])
         self.openrgb_host = env.get("OPENRGB_HOST", "127.0.0.1")
         self.openrgb_port = int(env.get("OPENRGB_PORT", "6742"))
         self.version_port = int(env.get("VERSION_PORT", "7716"))

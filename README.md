@@ -69,6 +69,7 @@ Entities appear in HA automatically under one device named
 
 | Var | Default | |
 |---|---|---|
+| `MQTT_LOGIN_FILE` | unset | path to a `chmod 600` file holding the username, then the password, on two lines; when set it wins over `MQTT_USER` / `MQTT_PASSWORD`, so a credential can be rotated without rewriting `.env` (set it in a systemd drop-in) |
 | `OPENRGB_HOST` / `OPENRGB_PORT` | `127.0.0.1` / `6742` | OpenRGB SDK server |
 | `VERSION_PORT` | `7716` | `/api/version` HTTP endpoint |
 | `POLL_SECONDS` | `30` | reconcile external color changes into HA |
