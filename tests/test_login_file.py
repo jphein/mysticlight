@@ -68,7 +68,9 @@ def test_fstat_failure_becomes_a_login_file_error(tmp_path, monkeypatch):
 
 def test_close_failure_never_masks_a_validation_error(tmp_path, monkeypatch):
     p = write(tmp_path, f"u\n{PW}\n", 0o644)
+    real_close = os.close
     def boom(fd):
+        real_close(fd)  # really close it (no fd leak), then fail
         raise OSError(5, "EIO")
     monkeypatch.setattr(login_file.os, "close", boom)
     refused(p, "chmod 600")
