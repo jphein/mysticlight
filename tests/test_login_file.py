@@ -48,10 +48,57 @@ def test_refuses_anything_but_exactly_two_lines(tmp_path, text):
     refused(write(tmp_path, text), "exactly two lines")
 
 
-def test_refuses_invalid_utf8_without_carrying_the_bytes(tmp_path):
+def test_refuses_invalid_utf8_and_no_exception_in_the_chain_holds_the_bytes(tmp_path):
     with pytest.raises(LoginFileError) as e:
         read_login_file(write(tmp_path, b"u\nsecret\xff\xfe\n"))
-    assert "UTF-8" in str(e.value) and e.value.__cause__ is None and e.value.__suppress_context__
+    assert "UTF-8" in str(e.value) and e.value.__cause__ is None and e.value.__context__ is None
+
+
+def test_bare_cr_at_eof_is_part_of_the_password(tmp_path):
+    assert read_login_file(write(tmp_path, b"u\npw\r")) == ("u", "pw\r")
+
+
+def test_fstat_failure_becomes_a_login_file_error(tmp_path, monkeypatch):
+    p = write(tmp_path, f"u\n{PW}\n")
+    def boom(fd):
+        raise OSError(5, "EIO")
+    monkeypatch.setattr(login_file.os, "fstat", boom)
+    refused(p, "cannot stat")
+
+
+def test_close_failure_never_masks_a_validation_error(tmp_path, monkeypatch):
+    p = write(tmp_path, f"u\n{PW}\n", 0o644)
+    def boom(fd):
+        raise OSError(5, "EIO")
+    monkeypatch.setattr(login_file.os, "close", boom)
+    refused(p, "chmod 600")
+
+
+def test_close_failure_does_not_spoil_a_good_read(tmp_path, monkeypatch):
+    p = write(tmp_path, f"u\n{PW}\n")
+    real_close = os.close
+    def boom(fd):
+        real_close(fd)
+        raise OSError(5, "EIO")
+    monkeypatch.setattr(login_file.os, "close", boom)
+    assert read_login_file(p) == ("u", PW)
+
+
+def _one_byte_reads(monkeypatch):
+    real = os.read
+    monkeypatch.setattr(login_file.os, "read", lambda fd, n: real(fd, min(n, 1)))
+
+
+def test_short_reads_still_parse(tmp_path, monkeypatch):
+    p = write(tmp_path, f"u\n{PW}\n")
+    _one_byte_reads(monkeypatch)
+    assert read_login_file(p) == ("u", PW)
+
+
+def test_short_reads_cannot_hide_extra_content(tmp_path, monkeypatch):
+    p = write(tmp_path, f"u\n{PW}\nextra\n")
+    _one_byte_reads(monkeypatch)
+    refused(p, "exactly two lines")
 
 
 def test_refuses_a_symlink_even_to_a_good_file(tmp_path):
